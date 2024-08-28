@@ -1,21 +1,17 @@
 'use client';
 
+import type { PropsWithChildren } from 'react';
+
 import { Environment, useGLTF } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 
-import hj from '~/assets/hj.glb';
 import jm from '~/assets/jm.glb';
 
 import { Effects } from './Effects';
 
-useGLTF.preload(hj);
 useGLTF.preload(jm);
 
-interface Props {
-  depth?: number;
-}
-
-export function ThreeBackground({ depth = 80 }: Props) {
+export function ThreeLayout({ children }: PropsWithChildren) {
   return (
     <Canvas
       flat={true}
@@ -25,7 +21,7 @@ export function ThreeBackground({ depth = 80 }: Props) {
         position: [0, 0, 10],
         fov: 20,
         near: 0.01,
-        far: depth + 50,
+        far: 150,
       }}
       style={{
         position: 'fixed',
@@ -47,6 +43,7 @@ export function ThreeBackground({ depth = 80 }: Props) {
       />
 
       <Environment preset="sunset" />
+      {children}
       <Effects />
     </Canvas>
   );
