@@ -20,7 +20,7 @@ export default function Page() {
   const playerPositions = useRef<Record<string, { x: number; y: number }>>({});
 
   const socket = usePartySocket({
-    host: 'localhost:1999',
+    host: 'bunch.nervestaple.partykit.dev',
     room: 'world',
     id: currentUser?.uid,
 
