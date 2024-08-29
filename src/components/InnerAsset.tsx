@@ -5,7 +5,7 @@ import type { PrimitiveProps, ThreeElements } from '@react-three/fiber';
 
 interface Props {
   src: string;
-  assetRef: RefObject<ThreeElements['primitive']>;
+  assetRef?: RefObject<ThreeElements['primitive']>;
 }
 
 export function InnerAsset({

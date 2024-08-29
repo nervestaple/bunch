@@ -33,6 +33,7 @@ module.exports = {
         'codegen*.ts',
         'next.config.mjs',
         '*.d.ts',
+        'src/server/**/*.ts',
       ],
       rules: {
         'import/no-default-export': 'off',

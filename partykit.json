@@ -1,0 +1,5 @@
+{
+    "name": "bunch",
+    "main": "src/server",
+    "compatibilityDate": "2024-08-29"
+}

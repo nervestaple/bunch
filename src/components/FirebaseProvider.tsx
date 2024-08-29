@@ -10,7 +10,12 @@ import {
 
 import { getAnalytics, isSupported, type Analytics } from 'firebase/analytics';
 import { initializeApp } from 'firebase/app';
-import { getAuth, type Auth } from 'firebase/auth';
+import {
+  getAuth,
+  signInAnonymously,
+  type Auth,
+  type User,
+} from 'firebase/auth';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyBaTFm4maWQ9QjgzNptJ_yatGS6rpgKtLM',
@@ -25,16 +30,20 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-const FirebaseContext = createContext<null | {
+const FirebaseContext = createContext<{
   auth: Auth;
   analytics: Analytics | null;
+  currentUser: null | User;
 }>({
   auth,
   analytics: null,
+  currentUser: null,
 });
 
 export function FirebaseProvider({ children }: PropsWithChildren) {
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
+  const [currentUser, setCurrentUser] = useState<null | User>(null);
+
   useEffect(() => {
     async function initAnalytics() {
       if (await isSupported()) {
@@ -45,8 +54,25 @@ export function FirebaseProvider({ children }: PropsWithChildren) {
     initAnalytics();
   }, []);
 
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setCurrentUser(user);
+    });
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    if (currentUser) {
+      return;
+    }
+    async function anonymousSignIn() {
+      await signInAnonymously(auth);
+    }
+    anonymousSignIn();
+  }, [currentUser]);
+
   return (
-    <FirebaseContext.Provider value={{ auth, analytics }}>
+    <FirebaseContext.Provider value={{ auth, analytics, currentUser }}>
       {children}
     </FirebaseContext.Provider>
   );

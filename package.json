@@ -17,17 +17,22 @@
     "@react-three/fiber": "^8.16.8",
     "@react-three/postprocessing": "^2.16.2",
     "@vercel/analytics": "^1.3.1",
+    "ahooks": "^3.8.1",
     "firebase": "^10.13.0",
     "ismobilejs": "^1.1.1",
     "lodash-es": "^4.17.21",
     "next": "^14.2.5",
     "partykit": "^0.0.110",
+    "partysocket": "^1.0.2",
     "postprocessing": "^6.36.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "sharp": "^0.33.4",
     "three": "^0.167.0",
-    "typescript": "5.5.4"
+    "threejs-math": "^0.147.0",
+    "ts-pattern": "^5.3.1",
+    "typescript": "5.5.4",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@ianvs/prettier-plugin-sort-imports": "^4.3.1",
