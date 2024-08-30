@@ -6,13 +6,11 @@ import { MutableRefObject, useEffect, useRef, useState } from 'react';
 import { animated, useSpring } from '@react-spring/three';
 import { isEqual, pickBy } from 'lodash-es';
 import usePartySocket from 'partysocket/react';
-import { Vector3 } from 'three';
 import { match } from 'ts-pattern';
 
 import { useFirebase } from '~/components/FirebaseProvider';
 import { MAX_UPDATE_MS } from '~/server/constants';
 import { MessageFromServer } from '~/server/schema';
-import { useFrame } from '@react-three/fiber';
 
 export default function Page() {
   const { currentUser } = useFirebase();
