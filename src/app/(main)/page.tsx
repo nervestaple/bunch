@@ -1,26 +1,27 @@
 'use client';
 
+import { EventEmitter } from 'events';
 import { MutableRefObject, useEffect, useRef, useState } from 'react';
 
-import { Sphere } from '@react-three/drei';
-import { useFrame } from '@react-three/fiber';
+import { animated, useSpring } from '@react-spring/three';
 import { isEqual, pickBy } from 'lodash-es';
 import usePartySocket from 'partysocket/react';
-import { Vector3, type Mesh } from 'three';
+import { Vector3 } from 'three';
 import { match } from 'ts-pattern';
 
 import { useFirebase } from '~/components/FirebaseProvider';
 import { MAX_UPDATE_MS } from '~/server/constants';
 import { MessageFromServer } from '~/server/schema';
+import { useFrame } from '@react-three/fiber';
 
 export default function Page() {
   const { currentUser } = useFirebase();
 
+  const updateEventEmitter = useRef<EventEmitter>(new EventEmitter());
   const [playerIds, setPlayerIds] = useState<Set<string>>(new Set());
-  const playerPositions = useRef<Record<string, { x: number; y: number }>>({});
 
   const socket = usePartySocket({
-    host: 'bunch.nervestaple.partykit.dev',
+    host: process.env.NEXT_PUBLIC_PARTYKIT_HOST,
     room: 'world',
     id: currentUser?.uid,
 
@@ -46,7 +47,10 @@ export default function Page() {
             if (!arePlayerIdsEqual) {
               setPlayerIds(new Set(Object.keys(positions)));
             }
-            playerPositions.current = positions;
+
+            Object.entries(positions).forEach(([id, { x, y }]) => {
+              updateEventEmitter.current.emit(id, { x, y });
+            });
           })
           .with({ type: 'pong' }, ({ time }) => {
             console.log('pong', time);
@@ -114,7 +118,7 @@ export default function Page() {
   return (
     <>
       {[...playerIds].map((id) => (
-        <Player key={id} id={id} playerPositions={playerPositions} />
+        <Player key={id} id={id} updateEventEmitter={updateEventEmitter} />
       ))}
     </>
   );
@@ -122,29 +126,32 @@ export default function Page() {
 
 function Player({
   id,
-  playerPositions,
+  updateEventEmitter,
 }: {
   id: string;
-  playerPositions: MutableRefObject<Record<string, { x: number; y: number }>>;
+  updateEventEmitter: MutableRefObject<EventEmitter>;
 }) {
-  const ref = useRef<Mesh>(null);
-  useFrame(() => {
-    if (!ref.current) {
-      return;
+  const [{ position }, api] = useSpring(() => ({
+    position: [0, 0],
+    config: { mass: 1, tension: 300, friction: 20 },
+  }));
+
+  useEffect(() => {
+    const emitter = updateEventEmitter.current;
+    function update({ x, y }: { x: number; y: number }) {
+      api.start({ position: [x, y] });
     }
 
-    const myPosition = playerPositions.current[id];
-    if (!myPosition) {
-      return;
-    }
-
-    ref.current.position.x = myPosition.x;
-    ref.current.position.y = myPosition.y;
-  });
+    emitter.on(id, update);
+    return () => {
+      emitter.off(id, update);
+    };
+  }, [id, updateEventEmitter, api]);
 
   return (
-    <Sphere ref={ref} position={new Vector3(0, 0, -50)}>
+    <animated.mesh position={position.to((x, y) => [x, y, -50])}>
+      <sphereGeometry args={[1, 32, 32]} />
       <meshStandardMaterial color="hotpink" />
-    </Sphere>
+    </animated.mesh>
   );
 }
